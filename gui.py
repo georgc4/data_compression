@@ -155,10 +155,11 @@
 
 import tkinter as tk
 from turtle import bgcolor, color
+from pyparsing import col
 import sympy
 sympy.init_printing()
 from functions import *
-from tkinter import ttk
+from tkinter import NW, SOLID, ttk
 from matplotlib import mathtext
 from io import BytesIO
 from PIL import ImageTk, Image
@@ -217,7 +218,7 @@ class tkinterApp(tk.Tk):
   
         # iterating through a tuple consisting
         # of the different page layouts
-        for F in (StartPage, KM, Page1, Page2):
+        for F in (StartPage, KM, Sardinas, Page1, Page2):
   
             frame = F(container, self)
   
@@ -257,8 +258,8 @@ class StartPage(tk.Frame):
         button1.grid(row = 1, column = 1, padx = 10, pady = 10)
   
         ## button to show frame 2 with text layout2
-        button2 = ttk.Button(self, text ="Page 2",
-        command = lambda : controller.show_frame(Page2))
+        button2 = ttk.Button(self, text ="Sardinas",
+        command = lambda : controller.show_frame(Sardinas))
      
         # putting the button in its place by
         # using grid
@@ -286,13 +287,14 @@ class KM(tk.Frame):
         # button to show frame 2 with text
         # layout2
         button2 = ttk.Button(self, text ="Check inequality",
-                            command = lambda arg = entry.get() : self.compute(entry.get()))
+                            command = lambda : self.compute(entry.get()))
      
         # putting the button in its place by
         # using grid
         button2.grid(row = 2, column = 1, padx = 10, pady = 10)
 
         self.label_success = ttk.Label(self, text='')
+        self.img_label = ttk.Label(self,image='')
 
     def compute(self,data):
         c = data.split()
@@ -308,38 +310,86 @@ class KM(tk.Frame):
         # Creating Pillow image object from it
         pimage= Image.open(buffer)
 
+        #Making background transparent
+        img = pimage.convert("RGBA")
+        datas = img.getdata()
+
+        newData = []
+        for item in datas:
+            if item[0] == 255 and item[1] == 255 and item[2] == 255:
+                newData.append((255, 255, 255, 0))
+            else:
+                newData.append(item)
+
+        img.putdata(newData)
         #Creating PhotoImage object from Pillow image object
-        image = ImageTk.PhotoImage(pimage)
+        image = ImageTk.PhotoImage(img)
 
         #Creating label with our image
-        mylabel = tk.Label(self,image=image)
+        # mylabel = tk.Label(self,image=image)
+        self.img_label.config(image='')
+        self.img_label.grid(row = 1, column =2)
+
 
         #Storing reference to our image object so it's not garbage collected,
         # as TkInter doesn't store references by itself
-        mylabel.img = image
-        mylabel.grid(row = 1, column =2)
+        self.img_label.config(image=image)
+        self.img_label.img = image
+        self.img_label.grid(row = 1, column =2)
 
         
-
+        self.label_success.config( text='')
+        self.label_success.grid(row = 2, column =2)
         
         self.success() if sum <=1 else self.fail()  
     
     def success(self):
         message = "Inequality holds"
-        self.label_success.config( text='')
-        self.label_success.grid(row = 2, column =2)
         self.label_success.config( text=message, foreground='green')
         self.label_success.grid(row = 2, column =2)
         
     def fail(self):
         message = "Inequality fails"
-        self.label_success.config( text='')
-        self.label_success.grid(row = 2, column =2)
         self.label_success = ttk.Label(self, text=message, foreground= 'red')
         self.label_success.grid(row = 2, column =2)
 
+# second window frame page1
+class Sardinas(tk.Frame):
+     
+    def __init__(self, parent, controller):
+         
+        tk.Frame.__init__(self, parent)
+        label = ttk.Label(self, text ="Enter space separated codewords: ")
+        label.grid(row = 1, column = 1, padx = 10, pady = 10)
 
+        ttk.Label(self,text='Sardinas-Patterson check for decodeability').grid(row=0, column=2, padx=10)
+        entry = ttk.Entry(self, width=40)
+        entry.grid(row=1,column=2)
   
+        # button to show frame 2 with text
+        # layout2
+        button1 = ttk.Button(self, text ="Home",
+                            command = lambda : controller.show_frame(StartPage))
+     
+        # putting the button in its place
+        # by using grid
+        button1.grid(row = 0, column = 1, padx = 10, pady = 10)
+  
+        button2 = ttk.Button(self, text ="Check decodeability",
+                            command = lambda : self.compute(entry.get()))
+     
+        # putting the button in its place by
+        # using grid
+        button2.grid(row = 1, column = 3, padx = 10, pady = 10)
+
+        self.setLabel = tk.Label(self, text='Prefix Sets', anchor=NW, fg='grey', height =12, width =20, background='white', borderwidth=0.5, relief=SOLID)
+        self.setLabel.grid(row=2, column=1,padx=20,pady =10)
+        self.outLabel = tk.Label(self, text='Output', anchor=NW, fg='grey', height =6, width =40, background='white', borderwidth=0.5, relief=SOLID)
+        self.outLabel.grid(row=2, column=2,padx=20,pady =10, sticky="N")
+    
+    def compute(self,data):
+        c = set(data.split())
+        
   
 # second window frame page1
 class Page1(tk.Frame):
