@@ -14,7 +14,7 @@ If you would like to run the scripts separately and manually configure I/O sourc
 
 It is not recommended to run GUI.py, rather use the executable (WIP).
 
-*### Installing
+### Installing
 
 * How/where to download your program
 * Any modifications needed to be made to files/folders
@@ -30,6 +30,6 @@ Download the executable file and run to use the GUI. To use the source code sepa
 
 ## Authors
 
-Contributors names and contact info
 
-[Carlos Georges] (https://carlosgeorges.com)
+
+[Carlos Georges](https://carlosgeorges.com)
