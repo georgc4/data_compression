@@ -16,14 +16,11 @@ It is not recommended to run GUI.py, rather use the executable (WIP).
 
 ### Installing
 
-* How/where to download your program
-* Any modifications needed to be made to files/folders
 Download the executable file and run to use the GUI. To use the source code separately then clone the repository an run as desired.
 
 ### Executing program
 
-* How to run the program
-* Step-by-step bullets
+
 
 Download the executable file and run to use the GUI. To use the source code separately then clone the repository an run as desired.
 
