@@ -14,9 +14,6 @@ If you would like to run the scripts separately and manually configure I/O sourc
 
 It is not recommended to run GUI.py, rather use the executable (WIP).
 
-### Installing
-
-Download the executable file and run to use the GUI. To use the source code separately then clone the repository an run as desired.
 
 ### Executing program
 
