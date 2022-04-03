@@ -155,7 +155,9 @@
 
 import tkinter as tk
 from turtle import bgcolor, color
-
+from pyparsing import col
+import sympy
+sympy.init_printing()
 from functions import *
 from tkinter import NW, SOLID, ttk
 from matplotlib import mathtext
@@ -387,7 +389,6 @@ class Sardinas(tk.Frame):
     
     def compute(self,data):
         c = set(data.split())
-        
   
 # second window frame page1
 class Page1(tk.Frame):
