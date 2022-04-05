@@ -67,7 +67,7 @@ def dm(delta, original):
 
 original = [-9,-9,-7,-6,-6,-8,-8,-3,0,0,0,2,1, 3,2,7,9,11,17,19,20]
 
-bits = len(bin(max(original,key=abs)))-2 #Bit length for twos complement 
+bits = len(bin(max(original,key=abs)))-1 #Bit length for twos complement 
 
 x = list(range(len(original))) #Scale for plots
 
