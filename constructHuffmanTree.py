@@ -11,6 +11,8 @@ class Node:
         self.right = right
 
         self.code = ''
+    def __repr__(self):
+        return str(self.symbol) + ': ' +str(self.prob) + ' ' + str(self.left) + ' ' + str(self.right)
 
 #sort nodes in descending order, putting combined nodes first in case of same probability
 def sortCodebook(codebook):
@@ -89,7 +91,7 @@ def ConstructHuffmanTree(symbols):
 
     print(nodes[0].symbol + ': ' + str(nodes[0].prob) + '\n')
     makeCodes(nodes[0])    
-
+    print(nodes)
 
 
 
@@ -108,7 +110,7 @@ Lav = round(sum(symbols[i][1]*len(codes.get(symbols[i][0])) for i in range(len(s
 Var = round(sum(symbols[i][1]* (len(codes.get(symbols[i][0]))-Lav)**2 for i in range(len(symbols))),4)
 R = round(abs(H-Lav),4)
 
-print()
+
 print('Codebook: ' + str(codes))
 print('Entropy: ' + str(H))
 print('Average Length ' + str(Lav))

@@ -218,7 +218,7 @@ class tkinterApp(tk.Tk):
   
         # iterating through a tuple consisting
         # of the different page layouts
-        for F in (StartPage, KM, Sardinas, Page1, Page2):
+        for F in (StartPage, KM, Sardinas, HuffmanTree, Page1, Page2):
   
             frame = F(container, self)
   
@@ -264,16 +264,24 @@ class StartPage(tk.Frame):
         # putting the button in its place by
         # using grid
         button2.grid(row = 2, column = 1, padx = 10, pady = 10)
+
+         ## button to show frame 2 with text layout2
+        button3 = ttk.Button(self, text ="Huffman Tree",
+        command = lambda : controller.show_frame(HuffmanTree))
+     
+        # putting the button in its place by
+        # using grid
+        button3.grid(row = 3, column = 1, padx = 10, pady = 10)
   
 class KM(tk.Frame):
     def __init__(self, parent, controller):
          
         tk.Frame.__init__(self, parent)
         label = ttk.Label(self, text ="Enter space separated codewords: ")
-        label.grid(row = 0, column = 1, padx = 10, pady = 10)
+        label.grid(row = 0, column = 2, padx = 10, pady = 10)
 
-        entry = ttk.Entry(self)
-        entry.grid(row=0,column=2)
+        self.entry = ttk.Entry(self)
+        self.entry.grid(row=0,column=3)
   
         # button to show frame 2 with text
         # layout2
@@ -282,16 +290,20 @@ class KM(tk.Frame):
      
         # putting the button in its place
         # by using grid
-        button1.grid(row = 1, column = 1, padx = 10, pady = 10)
+        button1.grid(row = 0, column = 1, padx = 10, pady = 10)
   
         # button to show frame 2 with text
         # layout2
         button2 = ttk.Button(self, text ="Check inequality",
-                            command = lambda : self.compute(entry.get()))
+                            command = lambda : self.compute(self.entry.get()))
      
         # putting the button in its place by
         # using grid
-        button2.grid(row = 2, column = 1, padx = 10, pady = 10)
+        button2.grid(row = 0, column = 4, padx = 10, pady = 10)
+
+
+        clearbutton = ttk.Button(self, text ='Clear', command=self.clear)
+        clearbutton.grid(row = 1, column = 4)
 
         self.label_success = ttk.Label(self, text='')
         self.img_label = ttk.Label(self,image='')
@@ -328,30 +340,35 @@ class KM(tk.Frame):
         #Creating label with our image
         # mylabel = tk.Label(self,image=image)
         self.img_label.config(image='')
-        self.img_label.grid(row = 1, column =2)
+        self.img_label.grid(row = 1, column =3)
 
 
         #Storing reference to our image object so it's not garbage collected,
         # as TkInter doesn't store references by itself
         self.img_label.config(image=image)
         self.img_label.img = image
-        self.img_label.grid(row = 1, column =2)
+        self.img_label.grid(row = 1, column =3)
 
         
         self.label_success.config( text='')
-        self.label_success.grid(row = 2, column =2)
+        self.label_success.grid(row = 2, column =3)
         
         self.success() if sum <=1 else self.fail()  
     
     def success(self):
         message = "Inequality holds"
         self.label_success.config( text=message, foreground='green')
-        self.label_success.grid(row = 2, column =2)
+        self.label_success.grid(row = 2, column =3)
         
     def fail(self):
         message = "Inequality fails"
         self.label_success = ttk.Label(self, text=message, foreground= 'red')
-        self.label_success.grid(row = 2, column =2)
+        self.label_success.grid(row = 2, column =3)
+    def clear(self):
+        self.entry.delete(0,'end')
+        self.label_success.config(text = '')
+        self.img_label.config(image='')
+        self.img_label.img = ''
 
 # second window frame page1
 class Sardinas(tk.Frame):
@@ -363,8 +380,8 @@ class Sardinas(tk.Frame):
         label.grid(row = 1, column = 1, padx = 10, pady = 10)
 
         ttk.Label(self,text='Sardinas-Patterson check for decodeability').grid(row=0, column=2, padx=10)
-        entry = ttk.Entry(self, width=40)
-        entry.grid(row=1,column=2)
+        self.entry = ttk.Entry(self, width=40)
+        self.entry.grid(row=1,column=2)
   
         # button to show frame 2 with text
         # layout2
@@ -376,20 +393,113 @@ class Sardinas(tk.Frame):
         button1.grid(row = 0, column = 1, padx = 10, pady = 10)
   
         button2 = ttk.Button(self, text ="Check decodeability",
-                            command = lambda : self.compute(entry.get()))
+                            command = lambda : self.compute(self.entry.get()))
      
         # putting the button in its place by
         # using grid
         button2.grid(row = 1, column = 3, padx = 10, pady = 10)
 
-        self.setLabel = tk.Label(self, text='Prefix Sets', anchor=NW, fg='grey', height =12, width =20, background='white', borderwidth=0.5, relief=SOLID)
+        button3 = ttk.Button(self,text='Clear', command = self.clear)
+        button3.grid(row = 2, column=3)
+        self.setVar = tk.StringVar(value ='Prefix/Suffix Sets')
+        self.outVar = tk.StringVar(value ='Output')
+        self.setLabel = tk.Message(self, textvariable=self.setVar, anchor=NW, fg='grey', width =120, background='white', borderwidth=0.5, relief=SOLID)
         self.setLabel.grid(row=2, column=1,padx=20,pady =10)
-        self.outLabel = tk.Label(self, text='Output', anchor=NW, fg='grey', height =6, width =40, background='white', borderwidth=0.5, relief=SOLID)
+        self.outLabel = tk.Message(self, textvariable=self.outVar, anchor=NW, fg='grey', width =200, background='white', borderwidth=0.5, relief=SOLID)
         self.outLabel.grid(row=2, column=2,padx=20,pady =10, sticky="N")
     
     def compute(self,data):
+        c = None
+
+        self.setVar.set('')
+        self.outVar.set('')
         c = set(data.split())
+        message,sets = sardinas(c)
+        self.setVar.set(sets)
+        self.outVar.set(message)
+    def clear(self):
+        self.entry.delete(0,'end')
+        self.setVar.set('Prefix/Suffix Sets')
+        self.outVar.set('Output')
+
+
+class HuffmanTree(tk.Frame):
+     
+    def __init__(self, parent, controller):
+        self.count = 3
+        tk.Frame.__init__(self, parent)
+        label = ttk.Label(self, text ="Sym : Prob")
+        label.grid(row = 1, column = 1, padx = 10, pady = 10)
+        
+
+        ttk.Label(self,text='Construct Huffman Tree').grid(row=0, column=2, padx=10)
+        
+        self.symEntries=[]
+        self.probEntries=[]
+
+        self.entriesFrame= tk.Frame(self,parent)
+        self.entriesFrame.grid(row =2, column =1,padx = 10, pady = 10)
+        # button to show frame 2 with text
+        # layout2
+        button1 = ttk.Button(self, text ="Home",
+                            command = lambda : controller.show_frame(StartPage))
+     
+        # putting the button in its place
+        # by using grid
+        button1.grid(row = 0, column = 1, padx = 10, pady = 10)
   
+        button2 = ttk.Button(self, text ="Construct Tree",
+                            command = self.compute)
+
+        # putting the button in its place by
+        # using grid
+        button2.grid(row = 1, column = 2, padx = 10, pady = 10)
+
+        button3 = ttk.Button(self,text='Clear', command = self.clear)
+        button3.grid(row = 1, column=3)
+        
+        self.newBtn = ttk.Button(self.entriesFrame,text='+', command = self.add, width=5)
+        self.newBtn.grid(row=self.count+1, column=2)
+        # self.canvas = tk.Canvas(self, 
+        # width = self.width, height = self.height,bg="white")
+        # self.canvas.grid(row=2,column=2)
+        self.add()
+        self.setVar = tk.StringVar(value ='Prefix/Suffix Sets')
+        self.outVar = tk.StringVar(value ='Output')
+        self.setLabel = tk.Message(self, textvariable=self.setVar, anchor=NW, fg='grey', width =120, background='white', borderwidth=0.5, relief=SOLID)
+        self.outLabel = tk.Message(self, textvariable=self.outVar, anchor=NW, fg='grey', width =200, background='white', borderwidth=0.5, relief=SOLID)
+        
+    def add(self):
+        
+        self.symEntries.append(tk.Entry(self.entriesFrame, width=5, borderwidth=0.5, relief=SOLID)) # Create and append to list
+        self.symEntries[-1].grid(row=self.count,column=1,padx=2, pady=5) # Place the just created widget
+        self.probEntries.append(tk.Entry(self.entriesFrame, width=5, borderwidth=0.5, relief=SOLID)) # Create and append to list
+        self.probEntries[-1].grid(row=self.count,column=2,padx=2, pady=5) # Place the just created widget
+        self.newBtn.grid(row=self.count+1, column=2)
+        self.count += 1 # Increase the count by 1
+    def compute(self):
+        symbols = [(self.symEntries[i].get(),float(self.probEntries[i].get())) for i in range(len(self.symEntries))]
+        root = ConstructHuffmanTree(symbols)
+        depth = maxDepth(root)
+        codebook = makeCodes(root)
+        self.root = root
+        self.width = 20* 2**maxDepth(root)
+        self.height = 800
+        self.canvas = tk.Canvas(self, 
+        width = self.width, height = self.height,bg="white")
+        self.canvas.grid(row=2,column=2)
+        self.angleFactor = math.pi/3
+        self.sizeFactor = .6
+        display(self)
+    def clear(self):
+        self.entry.delete(0,'end')
+        self.setVar.set('Prefix/Suffix Sets')
+        self.outVar.set('Output')
+
+
+
+
+
 # second window frame page1
 class Page1(tk.Frame):
      

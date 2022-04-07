@@ -1,60 +1,6 @@
+from tkinter import * # Import tkinter
 import math
-def km(c):
-    return sum([1/(2**len(i)) for i in c]) 
-
-
-found_words = []
-c_inf = set()
-sets = ''
-# recursive function to generate the next set in the sequence
-
-
-def generate_cn(c, n):
-    global sets
-    if n == 0:
-        return set(c)
-    else:
-        # create a set to hold our new elements
-        cn = set()
-
-        # generate c_(n-1)
-        cn_minus_1 = generate_cn(c, n-1)
-
-        for u in c:
-            for v in cn_minus_1:
-                if (len(u) > len(v)) and u.find(v) == 0 and u[len(v):] not in found_words:
-                    cn.add(u[len(v):])
-                    found_words.append(u[len(v):])
-        for u in cn_minus_1:
-            for v in c:
-                if len(u) > len(v) and u.find(v) == 0 and u[len(v):] not in found_words:
-                    cn.add(u[len(v):])
-                    found_words.append(u[len(v):])
-        if(len(cn_minus_1) > 0):
-            sets += 'S'+str(n) + ' ' + str(cn)+'\n'
-        c_inf.update(cn)
-        return cn
-
-
-def sardinas(c):
-    global sets
-    global found_words
-    global c_inf
-    sets = ''
-    c_inf = set()
-    found_words = []
-    n = sum(len(i) for i in c)
-    generate_cn(c, n)
-    message ='If ' + str(c) + ' and ' + str(c_inf) + ' have no common elements, then the code is uniquely decodeable\n'
-
-    if(c.isdisjoint(c_inf)):
-        message +='\nThe code ' + str(c) + ' is uniquely decodeable; The intersection between the alphabet and the union of all the suffix sets is the empty set\n'
-    else:
-        message += '\nThe code ' + str(c) + ' is not uniquely decodeable: The alphabet shares element(s) ' + str(c.intersection(c_inf)) + ' with the union of all the suffix sets\n'
-    return message,sets
-
-
-
+#node class definition
 class HuffTreeNode:
     def __init__(self, prob, symbol, left = None, right = None):
         self.prob = prob
@@ -145,7 +91,7 @@ def ConstructHuffmanTree(symbols):
         #repeat until we have one root node
 
     print(nodes[0].symbol + ': ' + str(nodes[0].prob) + '\n')
-    # makeCodes(nodes[0])    
+    makeCodes(nodes[0])    
     return nodes[0]
 
 def maxDepth(root):
@@ -163,42 +109,101 @@ def maxDepth(root):
     return leftDepth + 1
   else:
     return rightDepth + 1
+# Print nodes at a current level
+def printCurrentLevel(root, level):
+    if root is None:
+        return
+    if level == 1:
+        print(root)
+    elif level > 1:
+        printCurrentLevel(root.left, level-1)
+        printCurrentLevel(root.right, level-1)
+ 
+# Function to  print level order traversal of tree
+def printLevelOrder(root):
+    h = maxDepth(root)
+    
+    for i in range(1, h+1):
+        printCurrentLevel(root, i)
+ 
+ 
 
 
-def drawLine(self, x1,y1, x2,y2,root):
+################################################################
+## 'Main' function
+## Edit symbols list and run to get huffman encoding and relevant statistics
+
+
+#symbols = [('a1',0.4), ('a2',0.2), ('a3',0.2), ('a4',0.1), ('a5',0.1)] #Example from modules
+symbols = [('a', 0.4), ('b', 0.2), ('c',0.1), ('d', 0.1), ('e', 0.09), ('f',0.09), ('g', 0.01), ('h', 0.01)]
+root = ConstructHuffmanTree(symbols)
+printLevelOrder(root)
+print(maxDepth(root))
+class Main:
+    def __init__(self):
+        window = Tk() # Create a window
+        window.title("Recursive Tree") # Set a title
+        self.root = root
+        self.width = 20* 2**maxDepth(root)
+        self.height = 800
+        self.canvas = Canvas(window, 
+        width = self.width, height = self.height,bg="white")
+        self.canvas.pack()
+        self.angleFactor = math.pi/3
+        self.sizeFactor = .6
+        # Add a label, an entry, and a button to frame1
+        frame1 = Frame(window) # Create and add a frame to window
+        frame1.pack()
+
+        Label(frame1, 
+            text = "Enter the depth: ").pack(side = LEFT)
+        self.depth = StringVar()
+        Entry(frame1, textvariable = self.depth, 
+            justify = RIGHT).pack(side = LEFT)
+        Button(frame1, text = "Display Recursive Tree", 
+            command = self.display).pack(side = LEFT)
+
+        
+
+        window.mainloop() # Create an event loop
+
+    def drawLine(self, x1,y1, x2,y2,root):
         self.canvas.create_line(x1,y1, x2,y2, tags = "line")    
         self.canvas.create_text(x2+5,y2, text=str(root),anchor='w')
 
-def display(self):
+    def display(self):
         self.canvas.delete("line")
-        self.maxDepth = maxDepth(self.root)
+        self.maxDepth = maxDepth(root)
         x = self.width/2
         y = 20
         length = self.height/2
         angle = math.pi/2
         
         
-        paintBranch(self,1,x,y,x,y,self.root)
+        self.paintBranch(1,x,y,x,y,self.root)
             
            
             
 
 
-def paintBranch(self, depth,x1, y1, x2,y2,root):
+    def paintBranch(self, depth,x1, y1, x2,y2,root):
         
         
         # print("paintBranch: depth:", depth, "x1:", x1, "y1:", y1, 'x2:', x2, 'y2:', y2)
         if depth == self.maxDepth+1: return
-        drawLine(self,x1,y1, x2,y2,root)
+        self.drawLine(x1,y1, x2,y2,root)
         leftX = x2- ((0.5/(depth+1))*(self.width)/depth)
         rightX = x2+((0.5/(depth+1))*(self.width)/depth)
             # Draw the left branch
         
         if root.left is not None:
-            paintBranch(self,depth+1, x2, y2, leftX,y2+100,root.left )
+            self.paintBranch(depth+1, x2, y2, leftX,y2+100,root.left )
             self.canvas.create_text((x2+leftX)/2,y2+45, text='1',anchor='w')
             # Draw the right branch
         
         if root.right is not None:
-            paintBranch(self,depth+1, x2, y2, rightX,y2+100,root.right )        
+            self.paintBranch(depth+1, x2, y2, rightX,y2+100,root.right )        
             self.canvas.create_text((x2+rightX)/2,y2+45, text='0',anchor='w')       
+
+
+Main()
