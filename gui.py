@@ -630,7 +630,7 @@ class AdaptiveHuffman(tk.Frame):
         self.root = adaptiveHuffman(self,sequence)
         self.depth = maxDepth(self.root)-1
         self.width = self.depth*110
-        self.height =( self.depth-1)*100
+        self.height =( self.depth-1)*80
         self.canvas = tk.Canvas(self, 
             width = self.width, height = self.height,bg='#F0f0f0')
         self.canvas.grid(row=1, column=1, padx = 10)
@@ -646,6 +646,7 @@ class AdaptiveHuffman(tk.Frame):
     def home(self,controller):
         self.entryTxt.set('Enter a Sequence')
         self.entry.config(fg='grey')
+        self.clear()
         controller.show_frame(StartPage)
   
   

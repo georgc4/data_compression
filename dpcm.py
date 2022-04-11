@@ -17,13 +17,14 @@ def dpcm(quantizer, original):
             error.append( original[i]-predict[i])
             quantized_error.append( quantizer[error[i]])
             decoded.append( predict[i] + quantized_error[i])
-        mse.append( (decoded[i] - original[i])**2)
+        mse.append( (decoded[i] - original[i]) **2)
     return predict,error,quantized_error,decoded,mse
 
 quantizer = {}
 for i in range(-11,-7): quantizer[i] = -9
 for i in range(-7, -2): quantizer[i] = -5
 for i in range(-2,0): quantizer[i] = -1
+
 for i in range(0,2): quantizer[i] = 1
 for i in range(2,7): quantizer[i] = 5
 for i in range(7,12): quantizer[i] = 9
