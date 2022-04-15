@@ -4,11 +4,11 @@ with open('ac.csv') as read_obj:
     csv_reader = csv.reader(read_obj, delimiter = ' ')
     # Pass reader object to list() to get a list of lists
     list_of_rows = list(map(tuple,csv_reader))
-print(list_of_rows)
 ac_dict = dict()
 for row in list_of_rows:
     run,category = int(row[0]), int(row[1])
     ac_code_length,ac_code = int(row[2]), row[3]
+    ac_dict[(run,category)] = ac_code_length,ac_code
 class RangeDict(dict):
     def __getitem__(self, item):
         if not isinstance(item, range): # or xrange in Python 2
