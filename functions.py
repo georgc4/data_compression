@@ -367,3 +367,40 @@ def apaintBranch(self, depth, x1, y1, length, angle,root):
         if root.right is not None:
              apaintBranch(self,depth, x2, y2, length * self.sizeFactor, self.angle -self.angleFactor, root.right)        
             #  self.canvas.create_text(((x2+rightX)/2)+10,y2+45, text='1',anchor='w')           
+
+def unary(num):
+    return '1'*num + '0'
+
+def isPowerOfTwo(num):
+    return (math.ceil(math.log2(num) == math.floor(math.log2(num))))
+
+def golomb(n,m):
+    q = math.floor(n/m)
+    r = n - q*m
+    codeword = unary(q)
+    if isPowerOfTwo(m):
+        b = str(int(math.log2(m)))
+        codeword = codeword + format(r,'0'+b+'b')
+    else:
+        b = math.floor(math.log2(m))
+        if r < ((2**(b+1)) - m):
+            codeword = codeword + format(r,'0'+str(b)+'b')
+        else:
+            r = r + (2**(b+1)) - m
+            codeword = codeword + format(r,'0'+str(b+1)+'b')
+    return codeword
+
+def compGolomb(symbols,m):
+    
+
+    alphabet,probs = zip(*symbols)
+    dictionary = dict()
+    codebook = dict()
+    for i in range(len(alphabet)):
+        golombedSym = golomb(alphabet[i],m)
+        codebook[chr(alphabet[i]+64)] = golombedSym 
+        dictionary[golombedSym] = probs[i]
+    averageLength = 0
+    for word in dictionary:
+        averageLength += len(word)* dictionary[word]
+    return codebook, averageLength
