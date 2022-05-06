@@ -19,7 +19,7 @@ class zoomer(Tk):
         self.geometry(str(self.app_sizex+10) + "x" + str(self.app_sizey+40))
 
         #CANVAS + BORDER
-        self.canvas = Canvas(self, width = self.app_sizex, height = self.app_sizey, scrollregion=(0,0,x,y))
+        self.canvas = Canvas(self, width = self.app_sizex, height = self.app_sizey, scrollregion=(0,0,self.,y))
         self.canvas.grid(row=0, column=0, sticky="nsew")
         self.canvas.create_line(self.border, self.border, self.border, y-self.border)
         self.canvas.create_line(x-self.border, self.border, x-self.border, y-self.border)
