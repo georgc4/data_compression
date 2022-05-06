@@ -34,5 +34,5 @@ for k in range(len(sequence)):
     i += len(lastKnownKey) #traverse by size of last known key
     if i >=len(sequence):break
 
-print("Final dictionary is: " + str(list(charDict.keys())) + "\nEncoded message is: " + encoded) #Output message  
+print("Final dictionary is: " + str(list(enumerate(charDict.keys()))) + "\nEncoded message is: " + encoded) #Output message  
 

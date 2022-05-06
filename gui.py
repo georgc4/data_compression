@@ -64,7 +64,7 @@ class tkinterApp(tk.Tk):
   
         # iterating through a tuple consisting
         # of the different page layouts
-        for F in (StartPage, KM, Sardinas, HuffmanTree, AdaptiveHuffman,Golomb,  Page1, Page2):
+        for F in (StartPage, KM, Sardinas, HuffmanTree, AdaptiveHuffman,Golomb, Tunstall):
   
             frame = F(container, self)
   
@@ -120,7 +120,9 @@ class StartPage(tk.Frame):
 
         button5 = ttk.Button(self, text ="Golomb Encoding",
         command = lambda : controller.show_frame(Golomb))
-     
+
+        button6 = ttk.Button(self, text ="Tunstall Encoding",
+        command = lambda : controller.show_frame(Tunstall))
         # putting the button in its place by
         # using grid
         # button3.grid(row = 3, column = 1, padx = 10, pady = 10,columnspan=5)
@@ -130,7 +132,7 @@ class StartPage(tk.Frame):
         button3.pack(padx = 10,pady = 10)
         button4.pack(padx = 10,pady = 10)
         button5.pack(padx = 10,pady = 10)
-        
+        button6.pack(padx = 10,pady = 10)
 class KM(tk.Frame):
     def __init__(self, parent, controller):
          
@@ -288,7 +290,7 @@ class HuffmanTree(tk.Frame):
     def __init__(self, parent, controller):
         self.count = 3
         tk.Frame.__init__(self, parent)
-        
+        self.x,self.y=100,100
         self.ran = False
         self.controlFrame = tk.Frame(self,parent)
         self.controlFrame.grid(row=0, column=2, padx=10)
@@ -387,8 +389,18 @@ class HuffmanTree(tk.Frame):
             self.width = getMaxWidth(root)*200
             self.height = depth*100
             self.canvas = tk.Canvas(self, 
-            width = self.width, height = self.height,bg='#F0f0f0')
+            width = 400, height = 400,bg='#F0f0f0', scrollregion=(-50,-50,self.width,self.height))
+
             self.canvas.grid(row=1,column=2)
+             #SCROLLING BARS
+            self.vbar=tk.Scrollbar(self,orient=tk.VERTICAL)
+            self.vbar.grid(row=1, column=3, sticky="ns")
+            self.vbar.config(command=self.canvas.yview)
+            self.hbar=tk.Scrollbar(self,orient=tk.HORIZONTAL)
+            self.hbar.grid(row=2, column=2, sticky="ew")
+            self.hbar.config(command=self.canvas.xview)
+            self.canvas.config(xscrollcommand=self.hbar.set, yscrollcommand=self.vbar.set)
+
             self.outLabel = tk.Message(self, textvariable=self.outVar, anchor=NW, fg='black', width =self.width,background='white', borderwidth=0.5, relief=SOLID)
             self.outLabel.grid(row=3, column=2,padx=20,pady =10, sticky="N")
             
@@ -417,6 +429,9 @@ class HuffmanTree(tk.Frame):
             self.canvas.delete('all')
             self.canvas.grid_forget()
             self.outLabel.grid_forget()
+            self.vbar.grid_forget()
+            self.hbar.grid_forget()
+            self.ran = False
         self.outVar.set('Output')
         self.codebook = None
         self.symEntries.clear()
@@ -448,9 +463,9 @@ class AdaptiveHuffman(tk.Frame):
         self.entryFrame.grid(row = 0,column=1, padx = 10,pady = 10)
         self.infoMessage = tk.StringVar(self,value='Info')
         self.outLabel = tk.Message(self, textvariable=self.infoMessage, anchor=NW, fg='black', width =400,background='white', borderwidth=0.5, relief=SOLID)
-        self.outLabel.grid(row=2, column=1,padx=20,pady =10, sticky="N")
+        self.outLabel.grid(row=3, column=1,padx=20,pady =10, sticky="N")
         self.clearBtn = ttk.Button(self,text='Clear',command=self.clear)
-        self.clearBtn.grid(row=2, column=2,padx=20,pady=10)
+        self.clearBtn.grid(row=3, column=2,padx=20,pady=10)
             
         # button to show frame 2 with text
         # layout2
@@ -464,7 +479,12 @@ class AdaptiveHuffman(tk.Frame):
         self.entryTxt.set('Enter a Sequence')
         self.entry.config(fg='grey')
         
-        if self.ran: self.canvas.delete('all')
+        if self.ran: 
+            self.canvas.delete('all')
+            self.canvas.grid_forget()
+            self.hbar.grid_forget()
+            self.vbar.grid_forget()
+            self.ran = False
         self.infoMessage.set('Info')
 
 
@@ -480,20 +500,31 @@ class AdaptiveHuffman(tk.Frame):
             original_message += format(asciiDict[letter], "08b") #encoding message using ASCII dictionary
         
         
-        self.root = adaptiveHuffman(self,sequence)
+        self.root, self.encoded_sequence = adaptiveHuffman(self,sequence)
         self.depth = maxDepth(self.root)-1
         self.width = self.depth*110
         self.height =( self.depth-1)*80
         self.canvas = tk.Canvas(self, 
-            width = self.width, height = self.height,bg='#F0f0f0')
-        self.canvas.grid(row=1, column=1, padx = 10)
+        width = 600, height = 400,bg='#F0f0f0', scrollregion=(-50,-50,self.width+100,self.height))
+
+        self.canvas.grid(row=1,column=1)
+         #SCROLLING BARS
+        self.vbar=tk.Scrollbar(self,orient=tk.VERTICAL)
+        self.vbar.grid(row=1, column=2, sticky="ns")
+        self.vbar.config(command=self.canvas.yview)
+        self.hbar=tk.Scrollbar(self,orient=tk.HORIZONTAL)
+        self.hbar.grid(row=2, column=1, sticky="ew")
+        self.hbar.config(command=self.canvas.xview)
+        self.canvas.config(xscrollcommand=self.hbar.set, yscrollcommand=self.vbar.set)
+
         self.angleFactor = math.pi/3
         self.sizeFactor = 1
         adisplay(self)
-        # print('\n\nASCII encoded message: ' + str(original_message) + " - Length: " + str(len(original_message)))
-        # print('Adaptive Huffman message: ' + str(encoded_sequence) + " - Length: " + str(len(encoded_sequence)))
-        # print('Compression Ratio = ' + str(len(original_message)/len(encoded_sequence)))
-
+        self.canvas.xview_moveto(1)
+        self.message = 'ASCII encoded message: ' + str(original_message) + " - Length: " + str(len(original_message))
+        self.message +='\nAdaptive Huffman message: ' + str(self.encoded_sequence) + " - Length: " + str(len(self.encoded_sequence))
+        self.message+='\nCompression Ratio = ' + str(len(original_message)/len(self.encoded_sequence))
+        self.infoMessage.set(self.message)
 
     
     def home(self,controller):
@@ -622,7 +653,7 @@ class Golomb(tk.Frame):
                     
                     symbols = self.symbols_from_sequence(self.seq.get())
             if self.mVar.get() == 'm Value (Default = 4)': m = 4
-            else: m = self.mVar.get()
+            else: m = int(self.mVar.get())
             # symbols = [('a', 0.4), ('b', 0.2), ('c',0.1), ('d', 0.1), ('e', 0.09), ('f',0.09), ('g', 0.01), ('h', 0.01)]
             self.ran = True
             
@@ -662,6 +693,153 @@ class Golomb(tk.Frame):
         self.probEntries.clear()
         self.seq.delete(0,'end')
         self.add()
+
+class Tunstall(tk.Frame):
+     
+    def __init__(self, parent, controller):
+        self.count = 3
+        tk.Frame.__init__(self, parent)
+        
+        self.ran = False
+        self.controlFrame = tk.Frame(self,parent)
+        self.controlFrame.grid(row=0, column=2, padx=10)
+        self.choice = tk.IntVar()
+        ttk.Label(self.controlFrame,text='Tunstall encoding from', font='helvetica 12 bold').grid(row=0, column=0,columnspan=2)
+
+       
+        self.symEntries=[]
+        self.probEntries=[]
+
+        self.entriesFrame= tk.Frame(self,parent)
+        
+        self.sequenceFrame = tk.Frame(self,parent)
+        
+        self.seq = tk.Entry(self.sequenceFrame)
+        self.seq.grid(row=2,column=1,padx = 10, pady = 10)
+        ttk.Radiobutton(self.controlFrame,text='Sym : Prob pairs', value = 0, variable=self.choice, command= lambda: self.changeFrame(self.choice.get()) ).grid(row=1, column=0)
+        ttk.Radiobutton(self.controlFrame,text='Sequence', value = 1, variable=self.choice, command=lambda: self.changeFrame(self.choice.get()) ).grid(row=1, column=1)
+        self.caseSensitive = tk.IntVar()
+        tk.Checkbutton(self.controlFrame,text='Case Sensitive (Note: This may hurt compression ratio)', variable= self.caseSensitive).grid(row=2, column=0, columnspan=2)
+        label = ttk.Label(self.entriesFrame, text ="Sym : Prob")
+        label.grid(row = 1, column = 1, padx = 10, pady = 10)
+        
+        ttk.Label(self.sequenceFrame, text ='Enter Sequence').grid(row = 1, column = 1, padx = 10, pady = 10)
+        # button to show frame 2 with text
+        # layout2
+        button1 = ttk.Button(self, text ="Home",
+                            command = lambda: self.home(controller))
+     
+        # putting the button in its place
+        # by using grid
+        button1.grid(row = 0, column = 1, padx = 10)
+  
+        button2 = ttk.Button(self, text ="Go",
+                            command = self.compute)
+
+        # putting the button in its place by
+        # using grid
+        
+        self.mVar = tk.StringVar(value='m Value')
+        self.mEntry = tk.Entry(self,textvariable=self.mVar, fg= 'grey', width=20)
+        self.mEntry.grid(row = 0, column = 3, padx = 10)
+        self.mEntry.bind('<FocusIn>', self.clear_entry )
+        
+        button2.grid(row = 0, column = 4, padx = 10, pady = 10)
+        button3 = ttk.Button(self,text='Clear', command = self.clear)
+        button3.grid(row = 0, column=5, padx = 10, pady = 10)
+        
+        self.newBtn = ttk.Button(self.entriesFrame,text='+', command = self.add, width=5)
+        self.newBtn.grid(row=self.count+1, column=2)
+        # self.canvas = tk.Canvas(self, 
+        # width = self.width, height = self.height,bg="white")
+        # self.canvas.grid(row=2,column=2)
+        self.add()
+        self.frames = {}
+        self.frames[0] = self.entriesFrame
+        self.frames[1] = self.sequenceFrame
+        self.frame = self.frames[self.choice.get()]
+        self.outVar = tk.StringVar(value='Output')
+        self.outLabel = tk.Message(self, textvariable=self.outVar, anchor=NW, width=200, fg='black',background='white', borderwidth=0.5, relief=SOLID)
+        self.outLabel.grid(row=1, column=3,padx=20,pady =10, sticky="N",columnspan=2)
+        self.changeFrame(self.choice.get())
+        
+    def clear_entry(self,event):
+        if self.mEntry.get() == 'm Value (Default = 8)':
+            self.mVar.set('')
+            self.mEntry.config(fg='black')
+
+    def changeFrame(self, frame_num):
+        self.clear()
+        new_frame = self.frames[frame_num]
+        if self.frame is not None:
+            self.frame.grid_forget()
+        self.frame = new_frame
+        self.frame.grid(row =1, column =2,padx = 10, pady = 10)
+        
+    
+    
+    def home(self,controller):
+        self.clear()
+        controller.show_frame(StartPage)
+    def add(self):
+        
+        self.symEntries.append(tk.Entry(self.entriesFrame, width=5, borderwidth=0.5, relief=SOLID)) # Create and append to list
+        self.symEntries[-1].grid(row=self.count,column=1,padx=2, pady=5) # Place the just created widget
+        self.probEntries.append(tk.Entry(self.entriesFrame, width=5, borderwidth=0.5, relief=SOLID)) # Create and append to list
+        self.probEntries[-1].grid(row=self.count,column=2,padx=2, pady=5) # Place the just created widget
+        self.newBtn.grid(row=self.count+1, column=2)
+        self.count += 1 # Increase the count by 1
+    def symbols_from_sequence(self, sequence):
+        syms = dict.fromkeys([char for char in sequence],0)
+        for char in sequence:
+            syms[char] += round(1/len(sequence),3)
+        return [(k,v) for k,v in syms.items()]
+        
+    def compute(self):
+        
+        if self.seq.get() != '' or ( self.symEntries[0].get() != '' and self.probEntries[0].get() != ''):
+            if self.choice.get() == 0: 
+                if self.caseSensitive.get() == 0:
+                    symbols = [(self.symEntries[i].get().upper(),float(self.probEntries[i].get())) for i in range(len(self.symEntries))]
+                else:
+                    symbols = [(self.symEntries[i].get(),float(self.probEntries[i].get())) for i in range(len(self.symEntries))] 
+
+            else: 
+                if self.caseSensitive.get() == 0:
+                    symbols = self.symbols_from_sequence(self.seq.get().upper())
+                else:
+                    
+                    symbols = self.symbols_from_sequence(self.seq.get())
+            if self.mVar.get() == 'm Value (Default = 8)': m = 8
+            else: m = int(self.mVar.get())
+            # symbols = [('a', 0.4), ('b', 0.2), ('c',0.1), ('d', 0.1), ('e', 0.09), ('f',0.09), ('g', 0.01), ('h', 0.01)]
+            self.ran = True
+            print(dict(symbols))
+            msg= formAndPrintTree(dict(symbols), m)
+        
+            self.outVar.set(msg)
+          
+            
+
+
+    def clear(self):
+
+        for sym,prob in zip(self.symEntries, self.probEntries):
+            sym.grid_forget()
+            prob.grid_forget()
+        # if self.ran:  
+        #     self.canvas.delete('all')
+        #     self.canvas.grid_forget()
+        #     self.outLabel.grid_forget()
+        self.outVar.set('Output')
+        self.mVar.set('m Value (Default = 8)')
+        self.mEntry.config(fg='grey')
+        self.codebook = None
+        self.symEntries.clear()
+        self.probEntries.clear()
+        self.seq.delete(0,'end')
+        self.add()
+
 
 
 

@@ -335,7 +335,8 @@ def adaptiveHuffman(self,sequence):
             giveBirth(self,root, letter)
         print("Encoded sequence is now: " + self.encoded_sequence + "  Length: " + str(len(self.encoded_sequence)))
         print()
-    return root
+    
+    return root,self.encoded_sequence
 
 
 asciiDict = {chr(i): i for i in range(128)} #initialize ascii dictionary
@@ -347,7 +348,8 @@ def adisplay(self):
     self.canvas.delete("line")
     depth = self.depth
     self.angle =math.pi/2
-    return apaintBranch(self,depth, self.width/1.1, 0, self.height/depth, self.angle,self.root)
+    apaintBranch(self,depth, self.width/1.1, 0, self.height/depth, self.angle,self.root)
+
 def apaintBranch(self, depth, x1, y1, length, angle,root):
     if depth >= 0:
         depth -= 1
@@ -404,3 +406,153 @@ def compGolomb(symbols,m):
     for word in dictionary:
         averageLength += len(word)* dictionary[word]
     return codebook, averageLength
+
+s = ''
+
+#node class definition
+class TNode:
+    def __init__(self, symbol, prob):
+        self.prob = prob
+        self.symbol = symbol
+        self.n = '(' + '{:0.3f}'.format(self.prob) + ') ' + self.symbol + ' '
+        self.children = []
+        self.code = ''
+
+#print N-ary tree utility function -- courtesy of geeksforgeeks
+def printNTree(x,flag,depth,isLast):
+    global s
+
+    # Condition when node is None
+    if x == None:
+        return
+       
+    # Loop to print the depths of the
+    # current node
+    for i in range(1, depth):
+        # Condition when the depth is exploring
+        if flag[i]:
+            # print("| ","", "", "", end = "", file=s)
+            s += '|    '
+        # Otherwise print the blank spaces
+        else:
+            # print(" ", "", "", "", end = "", file=s)
+            s += '    '
+       
+    # Condition when the current node is the root node
+    if depth == 0:
+        s += '\n'
+       
+    # Condition when the node is the last node of the exploring depth
+    elif isLast:
+        if x.children == []:
+            # print("+---", '\033[92m' ,x.n, x.code, '\033[0m', file=s) #modified to make leaves green
+            s+= '+---  '+str(x.n)+str(x.code)+'\n'
+        else:
+            # print("+---", x.n,file=s)
+            s+= '+--- ' + str(x.n) +'\n'   
+        # No more childrens turn it to the non-exploring depth
+        flag[depth] = False
+    else:
+        if x.children == []:
+            # print("+---", '\033[92m' ,x.n, x.code, '\033[0m',file=s) #modified to make leaves green
+            s+= '+--- '+str(x.n)+str(x.code)+'\n'
+        else:
+            # print("+---", x.n,file=s) 
+            s+= '+--- ' + str(x.n) +'\n'   
+   
+    it = 0
+    for i in x.children:
+        it+=1 
+        # Recursive call for the children nodes
+        printNTree(i, flag, depth + 1, it == (len(x.children) - 1))
+    flag[depth] = True
+
+
+#function that counts number of leaves in the tree
+def countLeaves(node):
+    numOfLeaves = 0
+    for child in node.children:
+        if child.children == []:
+            numOfLeaves += 1
+        else:
+            numOfLeaves += countLeaves(child)
+    return numOfLeaves
+
+#function that adds all new symbols into a list    
+leaves = []
+def findLeaves(node):
+    for child in node.children:
+        if child.children == []:
+            leaves.append(child)
+        else:
+            findLeaves(child)
+    
+#function that finds the largest probability leaf
+def findlargest(root):
+    global maximum
+    # Base Case
+    if (root == None):  return
+
+    # If maximum is null, return the value of root node
+    if ((maximum) == None): maximum = root
+
+    # If value of the root is greater than maximum, update the maximum node
+    elif (root.prob > maximum.prob) and root.children == []: maximum = root
+
+    # Recursively call for all the children of the root node
+    for i in range(len(root.children)): findlargest(root.children[i])
+
+
+
+# Function to form the Tree and
+# print it graphically
+def formAndPrintTree(dictionary, m):
+    global maximum
+    global s
+    s=''
+    root = TNode('',0) #create a root
+
+    #add original symbols as leaves 
+    for word in dictionary:
+        root.children.append(TNode(word, dictionary[word]))
+        
+       
+    # Array to keep track
+    # of exploring depths
+      
+    flag = [True]*(m)
+    # Tree Formation
+
+    #algorithm is here
+    while True: 
+        if countLeaves(root) + len(dictionary) <= m: #if theres room for another iteration
+            maximum = None
+            findlargest(root) #get max leaf
+            for letter in dictionary:
+                    #add concatenated symbols to max node
+                    maximum.children.append(TNode(maximum.symbol + letter, maximum.prob * dictionary[letter]))
+        else: break #exit loop once limit is reached
+    
+   
+    #encode new dictionary
+    n = math.ceil(math.log2(m))
+    findLeaves(root)
+    
+    leafSyms = [leaf.symbol for leaf in leaves]
+    leafSyms.sort() #lexicographic sort
+    i = 0
+    for leaf in leaves:
+        #bit binary encoding
+        leaf.code = format(i, '0'+str(n)+'b') 
+        i+=1
+
+    printNTree(root, flag, 0, False) #print
+    
+    #Find average length per symbol
+    avgLength = 0
+    for leaf in leaves:
+        avgLength += (len(leaf.code)/len(leaf.symbol))*leaf.prob 
+    s+= "\nAverage Length per Symbol = " + str(round(avgLength,2))
+    return s
+
+
