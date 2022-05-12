@@ -9,41 +9,20 @@ from tkinter import NW, SOLID, ttk
 from matplotlib import mathtext
 from io import BytesIO
 from PIL import ImageTk, Image
-  
+import os
  
 LARGEFONT =("Verdana", 35)
-class Menubar(ttk.Frame):
-    """Builds a menu bar for the top of the main window"""
-    def __init__(self, parent, *args, **kwargs):
-        ''' Constructor'''
-        ttk.Frame.__init__(self, parent, *args, **kwargs)
-        self.root = parent
-        self.init_menubar()
 
-    def on_exit(self):
-        '''Exits program'''
-        quit()
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
 
-    def display_help(self):
-        '''Displays help document'''
-        pass
+    return os.path.join(base_path, relative_path)
 
-    def display_about(self):
-        '''Displays info about program'''
-        pass
-
-    def init_menubar(self):
-        self.menubar = tk.Menu(self.root)
-        self.menu_file = tk.Menu(self.menubar) # Creates a "File" menu
-        self.menu_file.add_command(label='Exit', command=self.on_exit) # Adds an option to the menu
-        self.menubar.add_cascade(menu=self.menu_file, label='File') # Adds File menu to the bar. Can also be used to create submenus.
-
-        self.menu_help = tk.Menu(self.menubar) #Creates a "Help" menu
-        self.menu_help.add_command(label='Help', command=self.display_help)
-        self.menu_help.add_command(label='About', command=self.display_about)
-        self.menubar.add_cascade(menu=self.menu_help, label='Help')
-
-        self.root.config(menu=self.menubar)  
 class tkinterApp(tk.Tk):
      
     # __init__ function for class tkinterApp
@@ -51,7 +30,7 @@ class tkinterApp(tk.Tk):
          
         # __init__ function for class Tk
         tk.Tk.__init__(self, *args, **kwargs)
-         
+        
         # creating a container
         container = tk.Frame(self, width=800, height=600) 
         container.pack(side = "top", fill = "both", expand = True)
@@ -64,7 +43,7 @@ class tkinterApp(tk.Tk):
   
         # iterating through a tuple consisting
         # of the different page layouts
-        for F in (StartPage, KM, Sardinas, HuffmanTree, AdaptiveHuffman,Golomb, Tunstall):
+        for F in (StartPage, KM, Sardinas, HuffmanTree, AdaptiveHuffman,Golomb, Tunstall, LZW):
   
             frame = F(container, self)
   
@@ -90,7 +69,7 @@ class StartPage(tk.Frame):
         tk.Frame.__init__(self, parent)
         
         # label of frame Layout 2
-        label = ttk.Label(self, text ="Compression", font = LARGEFONT)
+        label = ttk.Label(self, text ="Data Compression", font = LARGEFONT)
          
         # putting the grid in its place by using
         # grid
@@ -104,7 +83,7 @@ class StartPage(tk.Frame):
         # button1.grid(row = 1, column = 1, padx = 10, pady = 10,columnspan=5)
   
         ## button to show frame 2 with text layout2
-        button2 = ttk.Button(self, text ="Sardinas",
+        button2 = ttk.Button(self, text ="Sardinas-Patterson Decodability Check",
         command = lambda : controller.show_frame(Sardinas))
      
         # putting the button in its place by
@@ -121,8 +100,12 @@ class StartPage(tk.Frame):
         button5 = ttk.Button(self, text ="Golomb Encoding",
         command = lambda : controller.show_frame(Golomb))
 
-        button6 = ttk.Button(self, text ="Tunstall Encoding",
+        button6 = ttk.Button(self, text ="Tunstall Tree",
         command = lambda : controller.show_frame(Tunstall))
+
+        
+        button7 = ttk.Button(self, text ="LZW Encoding",
+        command = lambda : controller.show_frame(LZW))
         # putting the button in its place by
         # using grid
         # button3.grid(row = 3, column = 1, padx = 10, pady = 10,columnspan=5)
@@ -133,6 +116,7 @@ class StartPage(tk.Frame):
         button4.pack(padx = 10,pady = 10)
         button5.pack(padx = 10,pady = 10)
         button6.pack(padx = 10,pady = 10)
+        button7.pack(padx = 10,pady = 10)
 class KM(tk.Frame):
     def __init__(self, parent, controller):
          
@@ -240,7 +224,7 @@ class Sardinas(tk.Frame):
         label = ttk.Label(self, text ="Enter space separated codewords: ")
         label.grid(row = 1, column = 1, padx = 10, pady = 10)
 
-        ttk.Label(self,text='Sardinas-Patterson check for decodeability').grid(row=0, column=2, padx=10)
+        ttk.Label(self,text='Sardinas-Patterson check for decodeability',font='helvetica 12 bold').grid(row=0, column=2, padx=10)
         self.entry = ttk.Entry(self, width=40)
         self.entry.grid(row=1,column=2)
   
@@ -416,6 +400,10 @@ class HuffmanTree(tk.Frame):
             message += 'Average Length ' + str(Lav) + '\n'
             message += 'Variance: ' +str(Var) + '\n'
             message += 'Redundancy: ' +str(R) + '\n'
+            if self.choice.get() != 0:
+                encoded_seq = ''.join([self.codebook[sym] for sym in self.seq.get()])
+                message += 'Encoded Message: ' + encoded_seq + '\n'
+                message += 'Compression Ratio: ' + '{:0.3f}'.format(8*len(self.seq.get())/len(encoded_seq))
             self.outVar.set(message)
             
 
@@ -453,19 +441,21 @@ class AdaptiveHuffman(tk.Frame):
         # by using grid
         button1.grid(row = 0, column = 0, padx = 10,pady = 10)
         self.ran = False
+        ttk.Label(self,text='Adaptive Huffman Tree', font='helvetica 12 bold').grid(row=0, column=0,columnspan=2)
+
         self.entryFrame = tk.Frame(self, parent) 
         self.entryTxt = tk.StringVar(self,value ='Enter a Sequence')
         self.entry = tk.Entry(self.entryFrame, textvariable = self.entryTxt, fg = 'grey')
-        self.entry.grid(row = 0, column = 0, padx = 10)
+        self.entry.grid(row = 1, column = 0, padx = 10)
         self.entry.bind('<FocusIn>', self.clear_entry )
         self.goBtn = ttk.Button(self.entryFrame, text='Go', command = self.compute)
-        self.goBtn.grid(row = 0, column = 1, padx = 10)
-        self.entryFrame.grid(row = 0,column=1, padx = 10,pady = 10)
+        self.goBtn.grid(row = 1, column = 1, padx = 10)
+        self.entryFrame.grid(row = 1,column=1, padx = 10,pady = 10)
         self.infoMessage = tk.StringVar(self,value='Info')
         self.outLabel = tk.Message(self, textvariable=self.infoMessage, anchor=NW, fg='black', width =400,background='white', borderwidth=0.5, relief=SOLID)
         self.outLabel.grid(row=3, column=1,padx=20,pady =10, sticky="N")
         self.clearBtn = ttk.Button(self,text='Clear',command=self.clear)
-        self.clearBtn.grid(row=3, column=2,padx=20,pady=10)
+        self.clearBtn.grid(row=1, column=3,padx=20,pady=10)
             
         # button to show frame 2 with text
         # layout2
@@ -704,7 +694,7 @@ class Tunstall(tk.Frame):
         self.controlFrame = tk.Frame(self,parent)
         self.controlFrame.grid(row=0, column=2, padx=10)
         self.choice = tk.IntVar()
-        ttk.Label(self.controlFrame,text='Tunstall encoding from', font='helvetica 12 bold').grid(row=0, column=0,columnspan=2)
+        ttk.Label(self.controlFrame,text='Tunstall tree from', font='helvetica 12 bold').grid(row=0, column=0,columnspan=2)
 
        
         self.symEntries=[]
@@ -719,7 +709,7 @@ class Tunstall(tk.Frame):
         ttk.Radiobutton(self.controlFrame,text='Sym : Prob pairs', value = 0, variable=self.choice, command= lambda: self.changeFrame(self.choice.get()) ).grid(row=1, column=0)
         ttk.Radiobutton(self.controlFrame,text='Sequence', value = 1, variable=self.choice, command=lambda: self.changeFrame(self.choice.get()) ).grid(row=1, column=1)
         self.caseSensitive = tk.IntVar()
-        tk.Checkbutton(self.controlFrame,text='Case Sensitive (Note: This may hurt compression ratio)', variable= self.caseSensitive).grid(row=2, column=0, columnspan=2)
+        tk.Checkbutton(self.controlFrame,text='Case Sensitive (Note: This may hurt compression ratio)', variable= self.caseSensitive)
         label = ttk.Label(self.entriesFrame, text ="Sym : Prob")
         label.grid(row = 1, column = 1, padx = 10, pady = 10)
         
@@ -801,20 +791,15 @@ class Tunstall(tk.Frame):
             if self.choice.get() == 0: 
                 if self.caseSensitive.get() == 0:
                     symbols = [(self.symEntries[i].get().upper(),float(self.probEntries[i].get())) for i in range(len(self.symEntries))]
-                else:
-                    symbols = [(self.symEntries[i].get(),float(self.probEntries[i].get())) for i in range(len(self.symEntries))] 
 
             else: 
-                if self.caseSensitive.get() == 0:
-                    symbols = self.symbols_from_sequence(self.seq.get().upper())
-                else:
                     
                     symbols = self.symbols_from_sequence(self.seq.get())
             if self.mVar.get() == 'm Value (Default = 8)': m = 8
             else: m = int(self.mVar.get())
             # symbols = [('a', 0.4), ('b', 0.2), ('c',0.1), ('d', 0.1), ('e', 0.09), ('f',0.09), ('g', 0.01), ('h', 0.01)]
             self.ran = True
-            print(dict(symbols))
+            # print(dict(symbols))
             msg= formAndPrintTree(dict(symbols), m)
         
             self.outVar.set(msg)
@@ -841,7 +826,68 @@ class Tunstall(tk.Frame):
         self.add()
 
 
+class LZW(tk.Frame):
+     
+    def __init__(self, parent, controller):
+         
+        tk.Frame.__init__(self, parent)
+        button1 = ttk.Button(self, text ="Home",
+                            command = lambda: self.home(controller))
+     
+        # putting the button in its place
+        # by using grid
+        button1.grid(row = 1, column = 0, padx = 10,pady = 10)
+        self.ran = False
+        ttk.Label(self,text='LZW Encoding', font='helvetica 12 bold').grid(row=0, column=0,columnspan=2)
 
+        self.entryFrame = tk.Frame(self, parent) 
+        self.entryTxt = tk.StringVar(self,value ='Enter a Sequence')
+        self.entry = tk.Entry(self.entryFrame, textvariable = self.entryTxt, fg = 'grey')
+        self.entry.grid(row = 1, column = 0, padx = 10)
+        self.entry.bind('<FocusIn>', self.clear_entry )
+        self.goBtn = ttk.Button(self.entryFrame, text='Go', command = self.compute)
+        self.goBtn.grid(row = 1, column = 1, padx = 10)
+        self.entryFrame.grid(row = 1,column=1, padx = 10,pady = 10)
+        self.infoMessage = tk.StringVar(self,value='Output')
+        self.outLabel = tk.Message(self, textvariable=self.infoMessage, anchor=NW, fg='black', width =400,background='white', borderwidth=0.5, relief=SOLID)
+        self.outLabel.grid(row=3, column=1,padx=20,pady =10, sticky="N")
+        self.clearBtn = ttk.Button(self,text='Clear',command=self.clear)
+        self.clearBtn.grid(row=1, column=2,padx=20,pady=10)
+            
+        # button to show frame 2 with text
+        # layout2
+        
+        # button to show frame 2 with text
+    def clear_entry(self,event):
+        if self.entryTxt.get() == 'Enter a Sequence':
+            self.entryTxt.set('')
+            self.entry.config(fg='black')
+    def clear(self):
+        self.entryTxt.set('Enter a Sequence')
+        self.entry.config(fg='grey')
+        
+        if self.ran: 
+            self.ran = False
+        self.infoMessage.set('Output')
+
+
+    def compute(self):
+        self.ran = True
+        sequence = self.entry.get()
+        self.message, self.dic, encoded_sequence = LZWEncode(sequence)
+        original_length = 8*len(sequence)
+        compression_ratio = original_length/len(encoded_sequence)
+        self.message += "\nCompression Ratio: " + str(compression_ratio) + '\n'
+        self.infoMessage.set(self.message)
+
+    
+    def home(self,controller):
+        self.entryTxt.set('Enter a Sequence')
+        self.entry.config(fg='grey')
+        self.clear()
+        controller.show_frame(StartPage)
+  
+  
 
 # second window frame page1
 class Page1(tk.Frame):
@@ -901,4 +947,7 @@ class Page2(tk.Frame):
   
 # Driver Code
 app = tkinterApp()
+app.title('Data Compression')
+app.iconphoto(False, tk.PhotoImage(file=resource_path('system_binary.png')))
+
 app.mainloop()

@@ -6,6 +6,7 @@ from collections import OrderedDict
 sequence = 'hill_billie_bill_'
 
 hw6_given_dict = ['_', 'b', 'h', 'i', 'l', 'e'] #Custom order dictionary from hw6
+print(list(set(sequence)))
 charDict = OrderedDict.fromkeys(hw6_given_dict) #Initialize dictionary from hw6_given_dict
 
 encoded = '' #initialize encoded message

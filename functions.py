@@ -67,7 +67,7 @@ class HuffTreeNode:
 
         self.code = ''
     def __repr__(self):
-        return str(self.symbol) + ': ' +str(self.prob) 
+        return str(self.symbol) + ': ' +'{:0.3f}'.format(self.prob)
 
 #sort nodes in descending order, putting combined nodes first in case of same probability
 def sortCodebook(codebook):
@@ -99,15 +99,15 @@ def makeCodes(node, val=''):
 
     #traversing
     if(node.left):
-        print(node.symbol + ': Up (1)') 
+        # print(node.symbol + ': Up (1)') 
         makeCodes(node.left, newVal)
     if(node.right):
-        print(node.symbol + ': Down (0)')
+        # print(node.symbol + ': Down (0)')
         makeCodes(node.right, newVal)
     #base case where we've reached a leaf   
     if(not node.left and not node.right):
         codes[node.symbol] = newVal
-        print(node.symbol + ': ' + newVal +'\n')
+        # print(node.symbol + ': ' + newVal +'\n')
     return codes
 
 #create the tree
@@ -124,9 +124,9 @@ def ConstructHuffmanTree(symbols):
         nodes = sortCodebook(nodes)
 
         #show steps
-        for i in range(len(nodes)):
-            print(nodes[i].symbol + ': ' + str(nodes[i].prob))
-        print()
+        # for i in range(len(nodes)):
+            # print(nodes[i].symbol + ': ' + str(nodes[i].prob))
+        # print()
 
         #choose smallest two probabilities
         right = nodes[len(nodes)-1]
@@ -146,7 +146,7 @@ def ConstructHuffmanTree(symbols):
 
         #repeat until we have one root node
 
-    print(nodes[0].symbol + ': ' + str(nodes[0].prob) + '\n')
+    # print(nodes[0].symbol + ': ' + str(nodes[0].prob) + '\n')
     # makeCodes(nodes[0])    
     return nodes[0]
 def getMaxWidth(root):
@@ -309,10 +309,10 @@ def getCode(self,letter,root, val=''):
 
 
     if letter == root.symbol:
-        print("Letter " + letter + " was found. Sending " + val) 
+        # print("Letter " + letter + " was found. Sending " + val) 
         self.encoded_sequence += val
     elif root.symbol == 'NYT' and letter not in self.seen:
-        print("Letter " + letter + " was not found. Sending " + val + " for NYT, and " + format(asciiDict[letter], "08b") + " from ASCII dictionary" )
+        # print("Letter " + letter + " was not found. Sending " + val + " for NYT, and " + format(asciiDict[letter], "08b") + " from ASCII dictionary" )
         self.encoded_sequence += val + format(asciiDict[letter], "08b")
 
 #Send each symbol through the process
@@ -333,8 +333,8 @@ def adaptiveHuffman(self,sequence):
         else:
             self.seen.add(letter)
             giveBirth(self,root, letter)
-        print("Encoded sequence is now: " + self.encoded_sequence + "  Length: " + str(len(self.encoded_sequence)))
-        print()
+        # print("Encoded sequence is now: " + self.encoded_sequence + "  Length: " + str(len(self.encoded_sequence)))
+        # print()
     
     return root,self.encoded_sequence
 
@@ -555,4 +555,47 @@ def formAndPrintTree(dictionary, m):
     s+= "\nAverage Length per Symbol = " + str(round(avgLength,2))
     return s
 
+
+from collections import OrderedDict
+get_bin = lambda x, n: format(x, 'b').zfill(n)
+def LZWEncode(sequence):
+
+#sequence = 'wabba_wabba_wabba_wabba_woo_woo_woo' #Sequence to encode from example
+#charDict = OrderedDict.fromkeys(sorted(dict.fromkeys(sequence))) #Initialize dictionary structure sorted by lexicographical order
+    message = ''
+    seq_dict = list(set(sequence))
+
+    charDict = OrderedDict.fromkeys(seq_dict) #Initialize dictionary from hw6_given_dict
+
+    encoded = []#initialize encoded message
+
+    #Output message
+    message += "Sequence to encode is: " + sequence + "\nStarting dictionary is: " + str(list(charDict.keys()))
+
+    i = 0
+    step = 1
+    for k in range(len(sequence)):
+        pattern = sequence[i] #grab current letter
+        j =i #starting at current letter
+        while pattern in charDict and j+1 < len(sequence):
+            pattern += sequence[j+1] #concatenate next letter to current pattern while old pattern is in dictionary
+            j+=1 #go to next letter
+
+        if len(pattern) >1: lastKnownKey = pattern[0:-1] #last known key is the pattern minus the last letter
+        else: lastKnownKey = pattern
+
+        if lastKnownKey != '': 
+            ind = list(charDict.keys()).index(lastKnownKey)
+            encoded.append(ind) #add index of last known key to encoded sequence
+            # print("Step " + str(step) + ": \"" + lastKnownKey + "\": send " + ind + ", add \"" + pattern +"\"")
+        step += 1
+        charDict[pattern] = None #add new pattern to our dictionary
+        i += len(lastKnownKey) #traverse by size of last known key
+        if i >=len(sequence):break
+    mydict = dict((j,i) for i,j in enumerate(charDict.keys()))
+    encodedmsg=''
+    for i in encoded:
+        encodedmsg += get_bin(i,math.ceil(math.log2(max(encoded))))
+    message += "\nFinal dictionary is: " + str(mydict) + "\nEncoded message is: " + encodedmsg #Output message  
+    return message, mydict, encodedmsg
 
