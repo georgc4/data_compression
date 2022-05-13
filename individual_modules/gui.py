@@ -123,14 +123,14 @@ class KM(tk.Frame):
         tk.Frame.__init__(self, parent)
         label = ttk.Label(self, text ="Enter space separated codewords: ")
         label.grid(row = 0, column = 2, padx = 10, pady = 10)
-
+        self.ran = False
         self.entry = ttk.Entry(self)
         self.entry.grid(row=0,column=3)
   
         # button to show frame 2 with text
         # layout2
         button1 = ttk.Button(self, text ="Home",
-                            command = lambda : self.home())
+                            command = lambda : self.home(controller))
      
         # putting the button in its place
         # by using grid
@@ -154,6 +154,7 @@ class KM(tk.Frame):
 
     def compute(self,data):
         if data != '':
+            self.ran = True
             c = data.split()
             sum = km(c)
             buffer = BytesIO()
@@ -214,6 +215,7 @@ class KM(tk.Frame):
         self.label_success.config(text = '')
         self.img_label.config(image='')
         self.img_label.img = ''
+
     def home(self,controller):
         self.clear()
         controller.show_frame(StartPage)
@@ -234,7 +236,7 @@ class Sardinas(tk.Frame):
         # button to show frame 2 with text
         # layout2
         button1 = ttk.Button(self, text ="Home",
-                            command = lambda : self.home())
+                            command = lambda : self.home(controller))
      
         # putting the button in its place
         # by using grid
@@ -672,7 +674,7 @@ class Golomb(tk.Frame):
                 original_length = 8*len(self.seq.get())
                 compression_ratio = original_length/len(encoded_sequence)
                 msg += "Encoded Sequence: " + str(encoded_sequence) + '\n'
-                msg += "Compression Ratio: " + str(compression_ratio) + '\n'
+                msg += "Compression Ratio: " + '{.03f}'.format(compression_ratio) + '\n'
             self.outVar.set(msg)
           
             
@@ -798,7 +800,7 @@ class Tunstall(tk.Frame):
         return [(k,v) for k,v in syms.items()]
         
     def compute(self):
-        
+        symbols = None
         if self.seq.get() != '' or ( self.symEntries[0].get() != '' and self.probEntries[0].get() != ''):
             if self.choice.get() == 0: 
                 if self.caseSensitive.get() == 0:
@@ -960,6 +962,6 @@ class Page2(tk.Frame):
 # Driver Code
 app = tkinterApp()
 app.title('Data Compression')
-app.iconphoto(False, tk.PhotoImage(file=resource_path('system_binary.png')))
+app.iconphoto(False, tk.PhotoImage(file=resource_path('individual_modules/system_binary.png')))
 
 app.mainloop()

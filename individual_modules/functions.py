@@ -479,7 +479,7 @@ def countLeaves(node):
     return numOfLeaves
 
 #function that adds all new symbols into a list    
-leaves = []
+
 def findLeaves(node):
     for child in node.children:
         if child.children == []:
@@ -508,10 +508,11 @@ def findlargest(root):
 # print it graphically
 def formAndPrintTree(dictionary, m):
     global maximum
+    global leaves
+    leaves = []
     global s
     s=''
     root = TNode('',0) #create a root
-
     #add original symbols as leaves 
     for word in dictionary:
         root.children.append(TNode(word, dictionary[word]))
