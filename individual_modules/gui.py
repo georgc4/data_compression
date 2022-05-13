@@ -962,6 +962,6 @@ class Page2(tk.Frame):
 # Driver Code
 app = tkinterApp()
 app.title('Data Compression')
-app.iconphoto(False, tk.PhotoImage(file=resource_path('individual_modules/system_binary.png')))
+app.iconphoto(False, tk.PhotoImage(file=resource_path('system_binary.png')))
 
 app.mainloop()
